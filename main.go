@@ -22,8 +22,6 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 		log.Printf("Received a message from %s with the text: %s\n",
 			message.Sender.Username, message.Text)
 
-
-
 		// This works:
 		if strings.HasPrefix(message.Text, "!twitter") {
 
@@ -32,10 +30,7 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 			//Need to url decode string
 			// Need to remove space prefixed to string
 
-
 			// Dit werk nou add error checking
-
-
 
 			tweetslice := search_twitter_for_keyword(c, messagewithouttwitter)
 
@@ -82,7 +77,6 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 				bot.SendMessage(message.Chat,
 					tweet_creation_time, nil)
 
-
 				sess, err := session.NewSessionWithOptions(session.Options{
 					Config:  aws.Config{Region: aws.String("eu-west-1")},
 					Profile: "dynamodb-eclipse",
@@ -96,10 +90,14 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 				svc := dynamodb.New(sess)
 
 				r := Record{
-					ID:             tweetslice[i].IDStr,
-					TweetCreatedat: tweetslice[i].CreatedAt,
-					TweetLang:      tweetslice[i].Lang,
-					TweetText:      tweetslice[i].Text,
+					ID:                     tweetslice[i].IDStr,
+					TweetCreatedat:         tweetslice[i].CreatedAt,
+					TweetLang:              tweetslice[i].Lang,
+					TweetText:              tweetslice[i].Text,
+					TweetQuotedStatusIDStr: tweetslice[i].QuotedStatusIDStr,
+					TweetRetweetCount:      tweetslice[i].RetweetCount,
+					TweetFavoriteCount:     tweetslice[i].FavoriteCount,
+					TweetPossiblySensitive: tweetslice[i].PossiblySensitive,
 				}
 
 				item, err := dynamodbattribute.MarshalMap(r)
@@ -117,13 +115,9 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 
 			}
 
-
-
 		}
 	}
 }
-
-
 
 func queries(bot *telebot.Bot) {
 	for query := range bot.Queries {
@@ -189,10 +183,14 @@ func search_twitter_for_keyword(c *twitter.Client, querystring string) []twitter
 }
 
 type Record struct {
-	ID             string
-	TweetCreatedat string
-	TweetLang      string
-	TweetText      string
+	ID                     string
+	TweetCreatedat         string
+	TweetLang              string
+	TweetText              string
+	TweetQuotedStatusIDStr string
+	TweetRetweetCount      int
+	TweetFavoriteCount     int
+	TweetPossiblySensitive bool
 }
 
 func main() {
