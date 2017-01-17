@@ -3,7 +3,6 @@ package bigdatabot
 // Twitter related stuff
 
 import (
-	"fmt"
 	"github.com/dghubble/go-twitter/twitter"
 )
 
