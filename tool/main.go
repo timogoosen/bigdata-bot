@@ -10,12 +10,12 @@ import (
 	"github.com/coreos/pkg/flagutil"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	"github.com/timogoosen/bigdatabot"
 	"github.com/tucnak/telebot"
 	"log"
 	"os"
 	"strings"
 	"time"
-	"github.com/timogoosen/bigdatabot"
 )
 
 func messages(bot *telebot.Bot, c *twitter.Client) {
@@ -33,7 +33,7 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 
 			// Dit werk nou add error checking
 
-			tweetslice, err := bigdatabot.search_twitter_for_keyword(c, messagewithouttwitter)
+			tweetslice, err := search_twitter_for_keyword(c, messagewithouttwitter)
 
 			if err != nil {
 				log.Fatal(err)
