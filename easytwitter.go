@@ -18,7 +18,8 @@ import (
 func search_twitter_for_keyword(c *twitter.Client, querystring string) ([]twitter.Tweet, error) {
 
 	// Search Tweets
-	search, http_response, err := c.Search.Tweets(&twitter.SearchTweetParams{
+	// We don't make use of http_response hence _
+	search, _, err := c.Search.Tweets(&twitter.SearchTweetParams{
 		Query: querystring,
 	})
 
