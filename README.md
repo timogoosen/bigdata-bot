@@ -1,4 +1,4 @@
-# bigdata-bot
+# bigdatabot
 Telegram bot that does various things...
 
 Still crashes under lots of circumstances. Needs lots of work still.
