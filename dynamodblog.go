@@ -1,3 +1,4 @@
+/*
 package bigdatabot
 
 import (
@@ -7,3 +8,6 @@ import (
 "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
 )
+
+
+*/
