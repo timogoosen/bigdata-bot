@@ -15,7 +15,7 @@ import (
 // Would be cool to call it like this:
 // tweetslice , metadata := search_twitter_for_keyword(c, messagewithouttwitter)
 
-func search_twitter_for_keyword(c *twitter.Client, querystring string) ([]twitter.Tweet, error) {
+func SearchTwitterKeyword(c *twitter.Client, querystring string) ([]twitter.Tweet, error) {
 
 	// Search Tweets
 	// We don't make use of http_response hence _

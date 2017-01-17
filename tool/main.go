@@ -33,7 +33,7 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 
 			// Dit werk nou add error checking
 
-			tweetslice, err := search_twitter_for_keyword(c, messagewithouttwitter)
+			tweetslice, err := bigdatabot.SearchTwitterKeyword(c, messagewithouttwitter)
 
 			if err != nil {
 				log.Fatal(err)
