@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"bigdata-bot"
 )
 
 func messages(bot *telebot.Bot, c *twitter.Client) {
@@ -32,7 +33,7 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 
 			// Dit werk nou add error checking
 
-			tweetslice, err := bitdatabot.search_twitter_for_keyword(c, messagewithouttwitter)
+			tweetslice, err := bigdata-bot.search_twitter_for_keyword(c, messagewithouttwitter)
 
 			if err != nil {
 				log.Fatal(err)

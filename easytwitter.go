@@ -1,4 +1,4 @@
-package bigdatabot
+package bigdata-bot
 
 // Twitter related stuff
 
