@@ -32,7 +32,11 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 
 			// Dit werk nou add error checking
 
-			tweetslice := search_twitter_for_keyword(c, messagewithouttwitter)
+			tweetslice, err := bitdatabot.search_twitter_for_keyword(c, messagewithouttwitter)
+
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			for i := 0; i < len(tweetslice); i++ {
 
@@ -155,31 +159,6 @@ func queries(bot *telebot.Bot) {
 			log.Println("Failed to respond to query:", err)
 		}
 	}
-}
-
-func search_twitter_for_keyword(c *twitter.Client, querystring string) []twitter.Tweet {
-
-	// Search Tweets
-	search, _, _ := c.Search.Tweets(&twitter.SearchTweetParams{
-		Query: querystring,
-	})
-	// Figure out how to print out better as it is url encoded at the moment
-	fmt.Println("Tweets matching our query: ", search.Metadata.Query)
-
-	// Convert to string before printing or use print format character for int.
-	fmt.Println("Tweet has count of: ", search.Metadata.Count)
-
-	// We can access stuff from results like this:
-
-	//searchquery := search.Metadata.Query
-	//refreshurl := search.Metadata.RefreshURL
-	//	fmt.Println("Tweet has the following refreshurl: %s\n", refreshurl)
-
-	// Read in the slice of statuses.
-
-	tweetslice := search.Statuses
-	return tweetslice
-
 }
 
 type Record struct {
