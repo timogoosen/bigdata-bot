@@ -17,7 +17,9 @@ TODO:
 
 9. Search for spot instance pricing according to some search criteria.
 
-10. Get cloudwatch alerts using cloudwatch part of api for Golang AWS SDK
+10. Log all messages from specific channel to DynamoDB. Start by first printing to stdout
+
+
 
 
 

@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-func messages(bot *telebot.Bot, c *twitter.Client) {
+func messages(bot *telebot.Bot, c *twitter.Client, svc *dynamodb.DynamoDB) {
 	for message := range bot.Messages {
 		log.Printf("Received a message from %s with the text: %s\n",
 			message.Sender.Username, message.Text)
@@ -81,7 +81,7 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 					tweet_text, nil)
 				bot.SendMessage(message.Chat,
 					tweet_creation_time, nil)
-
+/*
 				sess, err := session.NewSessionWithOptions(session.Options{
 					Config:  aws.Config{Region: aws.String("eu-west-1")},
 					Profile: "dynamodb-eclipse",
@@ -94,6 +94,8 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 
 				svc := dynamodb.New(sess)
 
+				*/
+
 				r := Record{
 					ID:                     tweetslice[i].IDStr,
 					TweetCreatedat:         tweetslice[i].CreatedAt,
@@ -105,6 +107,7 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 					TweetPossiblySensitive: tweetslice[i].PossiblySensitive,
 				}
 
+// Break this into functions too if you can
 				item, err := dynamodbattribute.MarshalMap(r)
 				if err != nil {
 					fmt.Println("Failed to convert", err)
@@ -115,7 +118,7 @@ func messages(bot *telebot.Bot, c *twitter.Client) {
 					Item:      item,
 					TableName: aws.String("twitter3"),
 				})
-
+// up to here
 				fmt.Println(result)
 
 			}
@@ -196,6 +199,23 @@ func main() {
 	// Twitter client
 	client := twitter.NewClient(httpClient)
 
+	// DynamoDB Stuff
+
+	sess, err := session.NewSessionWithOptions(session.Options{
+		Config:  aws.Config{Region: aws.String("eu-west-1")},
+		Profile: "dynamodb-eclipse",
+	})
+
+	if err != nil {
+		fmt.Println("failed to create session,", err)
+		return
+	}
+
+	svc := dynamodb.New(sess)
+
+	// DynamoDB Stuff ends here
+
+
 	// Telegram API client related code
 
 	bot, err := telebot.NewBot(os.Getenv("BOT_TOKEN"))
@@ -206,7 +226,9 @@ func main() {
 	bot.Messages = make(chan telebot.Message, 100)
 	bot.Queries = make(chan telebot.Query, 1000)
 
-	go messages(bot, client)
+	// Also passing twitter client to messages in go routine
+
+	go messages(bot, client, svc)
 	go queries(bot)
 
 	bot.Start(1 * time.Second)
