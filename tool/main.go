@@ -19,6 +19,8 @@ import (
 )
 
 func messages(bot *telebot.Bot, c *twitter.Client, svc *dynamodb.DynamoDB) {
+
+
 	for message := range bot.Messages {
 		log.Printf("Received a message from %s with the text: %s\n",
 			message.Sender.Username, message.Text)
@@ -129,6 +131,14 @@ func messages(bot *telebot.Bot, c *twitter.Client, svc *dynamodb.DynamoDB) {
 
 func queries(bot *telebot.Bot) {
 	for query := range bot.Queries {
+
+
+		if strings.HasPrefix(query.Text, "!twitter") {
+
+
+			fmt.Println("Hey you said you want something from twitter?")
+		}
+
 		log.Println("--- new query ---")
 		// Could write some code to log this to sqlite?
 		log.Println("from:", query.From.Username)
@@ -222,6 +232,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+
 
 	bot.Messages = make(chan telebot.Message, 100)
 	bot.Queries = make(chan telebot.Query, 1000)

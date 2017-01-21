@@ -41,3 +41,14 @@ someone and in response to that you respond to another user using their username
 Twitter section:
 
 - Break up main code into functions that just return text.
+
+
+
+---------------------------------
+
+
+Maak iets om track te hou van wie jou message
+
+table:
+
+timestamp personwhomessaged message private_or_in_group
