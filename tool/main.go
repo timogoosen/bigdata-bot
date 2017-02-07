@@ -13,26 +13,31 @@ import (
 )
 
 
+
 type MessageLog struct {
-	Firstname                     string
-	Lastname        string
+
 	Username              string
 	Messagetext             string
 	Title							string
+	Type						string
 	Id     						int
 }
 
 func logmessages(message telebot.Message,svc *dynamodb.DynamoDB) {
 
+	chattype := fmt.Sprintf("%s", message.Chat.Type)
+
 loggedmessage := MessageLog{
-	Firstname:                     message.Sender.FirstName,
-	Lastname:         message.Sender.LastName,
+
 	Username:              message.Chat.Username,
 	Messagetext:              message.Text,
 	Title: 									message.Chat.Title,
+	Type:                     chattype,
 	Id:											message.ID,
 
 }
+
+
 
 // Break this into functions too if you can
 item, err := dynamodbattribute.MarshalMap(loggedmessage)
@@ -43,7 +48,7 @@ if err != nil {
 
 result, err := svc.PutItem(&dynamodb.PutItemInput{
 	Item:      item,
-	TableName: aws.String("MessageLog"),
+	TableName: aws.String("GroupMessageLog"),
 })
 // up to here
 fmt.Println(result)
