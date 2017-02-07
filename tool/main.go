@@ -1,26 +1,60 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"github.com/tucnak/telebot"
+	"log"
+	"os"
+	"time"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/coreos/pkg/flagutil"
-	"github.com/dghubble/go-twitter/twitter"
-	"github.com/dghubble/oauth1"
-	"github.com/timogoosen/bigdatabot"
-	"github.com/tucnak/telebot"
-	"log"
-	"os"
-	"strings"
-	"time"
+	"fmt"
 )
 
+
+type MessageLog struct {
+	Firstname                     string
+	Lastname        string
+	Username              string
+	Messagetext             string
+	Title							string
+	Id     						int
+}
+
+func logmessages(message telebot.Message,svc *dynamodb.DynamoDB) {
+
+loggedmessage := MessageLog{
+	Firstname:                     message.Sender.FirstName,
+	Lastname:         message.Sender.LastName,
+	Username:              message.Chat.Username,
+	Messagetext:              message.Text,
+	Title: 									message.Chat.Title,
+	Id:											message.ID,
+
+}
+
+// Break this into functions too if you can
+item, err := dynamodbattribute.MarshalMap(loggedmessage)
+if err != nil {
+	fmt.Println("Failed to convert struct into Marshalled Map for DynamoDB to Ingest", err)
+	log.Fatal(err)
+}
+
+result, err := svc.PutItem(&dynamodb.PutItemInput{
+	Item:      item,
+	TableName: aws.String("MessageLog"),
+})
+// up to here
+fmt.Println(result)
+
+
+}
+
+
+
+/*
 func messages(bot *telebot.Bot, c *twitter.Client, svc *dynamodb.DynamoDB) {
-
-
 	for message := range bot.Messages {
 		log.Printf("Received a message from %s with the text: %s\n",
 			message.Sender.Username, message.Text)
@@ -45,24 +79,12 @@ func messages(bot *telebot.Bot, c *twitter.Client, svc *dynamodb.DynamoDB) {
 
 				// Get the text of each tweet.
 				// for other struct attributes look at Tweet struct in twitter/statuses.go ...
-				tweet_text := tweetslice[i].Text // The text contained in the tweet.
-				//	tweet_user := tweetslice[i].User // user who tweeted something
+				tweet_text := tweetslice[i].Text
 
-				//tweet_gps := tweetslice[i].Coordinates
-				// If there is GPS co-ordinates: Where The Tweet was made from.
-				// If this has no value then it returns nil. Create a check to check if it was nil.
 				tweet_creation_time := tweetslice[i].CreatedAt
 				// New Stuff to check for:
 				tweet_lang := tweetslice[i].Lang
 				tweet_id_string := tweetslice[i].IDStr
-
-				/*			stuff := TweetStuff{
-							id:             tweetslice[i].IDStr,
-							tweetcreatedat: tweetslice[i].CreatedAt,
-							tweetlang:      tweetslice[i].Lang,
-							tweetsource:    tweetslice[i].Source,
-							tweettext:      tweetslice[i].Text,
-						}  */
 
 				fmt.Println("Tweet Language is:", tweet_lang)
 				fmt.Println("Tweet id string is:", tweet_id_string)
@@ -83,20 +105,7 @@ func messages(bot *telebot.Bot, c *twitter.Client, svc *dynamodb.DynamoDB) {
 					tweet_text, nil)
 				bot.SendMessage(message.Chat,
 					tweet_creation_time, nil)
-/*
-				sess, err := session.NewSessionWithOptions(session.Options{
-					Config:  aws.Config{Region: aws.String("eu-west-1")},
-					Profile: "dynamodb-eclipse",
-				})
 
-				if err != nil {
-					fmt.Println("failed to create session,", err)
-					return
-				}
-
-				svc := dynamodb.New(sess)
-
-				*/
 
 				r := Record{
 					ID:                     tweetslice[i].IDStr,
@@ -126,54 +135,12 @@ func messages(bot *telebot.Bot, c *twitter.Client, svc *dynamodb.DynamoDB) {
 			}
 
 		}
+
 	}
 }
+*/
 
-func queries(bot *telebot.Bot) {
-	for query := range bot.Queries {
-
-
-		if strings.HasPrefix(query.Text, "!twitter") {
-
-
-			fmt.Println("Hey you said you want something from twitter?")
-		}
-
-		log.Println("--- new query ---")
-		// Could write some code to log this to sqlite?
-		log.Println("from:", query.From.Username)
-		// And this
-		log.Println("text:", query.Text)
-
-		// Figure uit wat doen hierdie deel en wat is die use case.
-
-		// Create an article (a link) object to show in results.
-		article := &telebot.InlineQueryResultArticle{
-			Title: "Telebot",
-			URL:   "https://github.com/tucnak/telebot",
-			InputMessageContent: &telebot.InputTextMessageContent{
-				Text:           "Telebot is a Telegram bot framework.",
-				DisablePreview: false,
-			},
-		}
-
-		// Build the list of results (make sure to pass pointers!).
-		results := []telebot.InlineQueryResult{article}
-
-		// Build a response object to answer the query.
-
-		// Dis hoe mens 'n struct van imported package call: Baie goe voorbeeld
-		response := telebot.QueryResponse{
-			Results:    results,
-			IsPersonal: true,
-		}
-
-		// Send it.
-		if err := bot.AnswerInlineQuery(&query, &response); err != nil {
-			log.Println("Failed to respond to query:", err)
-		}
-	}
-}
+/*
 
 type Record struct {
 	ID                     string
@@ -186,45 +153,55 @@ type Record struct {
 	TweetPossiblySensitive bool
 }
 
+*/
+
 func main() {
 
-	// Twitter client related code
-	flags := flag.NewFlagSet("user-auth", flag.ExitOnError)
-	consumerKey := flags.String("consumer-key", "", "Twitter Consumer Key")
-	consumerSecret := flags.String("consumer-secret", "", "Twitter Consumer Secret")
-	accessToken := flags.String("access-token", "", "Twitter Access Token")
-	accessSecret := flags.String("access-secret", "", "Twitter Access Secret")
-	flags.Parse(os.Args[1:])
-	flagutil.SetFlagsFromEnv(flags, "TWITTER")
+	/*
 
-	if *consumerKey == "" || *consumerSecret == "" || *accessToken == "" || *accessSecret == "" {
-		log.Fatal("Consumer key/secret and Access token/secret required")
-	}
+		// Twitter client related code
+		flags := flag.NewFlagSet("user-auth", flag.ExitOnError)
+		consumerKey := flags.String("consumer-key", "", "Twitter Consumer Key")
+		consumerSecret := flags.String("consumer-secret", "", "Twitter Consumer Secret")
+		accessToken := flags.String("access-token", "", "Twitter Access Token")
+		accessSecret := flags.String("access-secret", "", "Twitter Access Secret")
+		flags.Parse(os.Args[1:])
+		flagutil.SetFlagsFromEnv(flags, "TWITTER")
 
-	config := oauth1.NewConfig(*consumerKey, *consumerSecret)
-	token := oauth1.NewToken(*accessToken, *accessSecret)
-	// OAuth1 http.Client will automatically authorize Requests
-	httpClient := config.Client(oauth1.NoContext, token)
+		if *consumerKey == "" || *consumerSecret == "" || *accessToken == "" || *accessSecret == "" {
+			log.Fatal("Consumer key/secret and Access token/secret required")
+		}
 
-	// Twitter client
-	client := twitter.NewClient(httpClient)
+		config := oauth1.NewConfig(*consumerKey, *consumerSecret)
+		token := oauth1.NewToken(*accessToken, *accessSecret)
+		// OAuth1 http.Client will automatically authorize Requests
+		httpClient := config.Client(oauth1.NoContext, token)
+
+		// Twitter client
+		client := twitter.NewClient(httpClient)
+
+	*/
 
 	// DynamoDB Stuff
+	// Commment out from here
 
-	sess, err := session.NewSessionWithOptions(session.Options{
-		Config:  aws.Config{Region: aws.String("eu-west-1")},
-		Profile: "dynamodb-eclipse",
-	})
+		sess, err := session.NewSessionWithOptions(session.Options{
+			Config:  aws.Config{Region: aws.String("eu-west-1")},
+			Profile: "dynamodb-eclipse",
+		})
 
-	if err != nil {
-		fmt.Println("failed to create session,", err)
-		return
-	}
+		if err != nil {
+			fmt.Println("failed to create session,", err)
+			return
+		}
 
-	svc := dynamodb.New(sess)
+		svc := dynamodb.New(sess)
 
-	// DynamoDB Stuff ends here
+		// DynamoDB Stuff ends here
 
+
+
+	// Up to here ..............................................
 
 	// Telegram API client related code
 
@@ -233,15 +210,28 @@ func main() {
 		log.Fatalln(err)
 	}
 
-
-
-	bot.Messages = make(chan telebot.Message, 100)
-	bot.Queries = make(chan telebot.Query, 1000)
+	//bot.Messages = make(chan telebot.Message, 100)
+	//bot.Queries = make(chan telebot.Query, 1000)
 
 	// Also passing twitter client to messages in go routine
 
-	go messages(bot, client, svc)
-	go queries(bot)
+	//go messages(bot, client, svc)
+	//go queries(bot)
 
-	bot.Start(1 * time.Second)
+	messages := make(chan telebot.Message, 100)
+	bot.Listen(messages, 1*time.Second)
+	//bot.Start(1 * time.Second)
+	for message := range messages {
+
+		// See if we can call it here.
+		// If this works we can make the function return an error and add propper error checking
+		logmessages(message,svc)
+
+		log.Printf("Received a message : %s\n", message.Text)
+		log.Printf("Message type : %s\n", message.Chat.Type)
+		log.Printf("Message type : %s\n", message.Chat.Title)
+		log.Printf("Message ID: %s\n", message.ID)
+
+	}
+
 }
